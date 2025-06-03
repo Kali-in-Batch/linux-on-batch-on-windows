@@ -91,15 +91,20 @@ for /f "tokens=*" %%a in (%1) do (
                     )
                 ) else (
                     rem For msg db "Hello, world!", 0x0A and similar
-                    set "remaining=!line:~4!"
-                    set "first_word=!line:~0,3!"
-                    set "two_chars=!remaining:~0,2!"
-                    if "!two_chars!" == "db" (
-                        set "pointer=!remaining:~3!"
+                    for /f "tokens=3,*" %%t in ("!line!") do (
+                        set "pointer=%%t %%u"
+                    )
+                    for /f "tokens=1,2" %%t in ("!line!") do (
+                        set "first_word=%%t"
+                        set "second_word=%%u"
+                    )
+                    if "!second_word!" == "db" (
                         for /f "tokens=*" %%t in ("!first_word!") do (
                             set "pointer_%%t=!pointer!"
                             rem Remove , 0x0A from the pointer
                             set "pointer_%%t=!pointer_%%t:, 0x0A=!"
+                            rem Remove surrounding quotes
+                            set "pointer_%%t=!pointer_%%t:"=!"
                         )
                     )
                 )
