@@ -1,5 +1,4 @@
 @echo off
-
 setlocal enabledelayedexpansion
 
 rem Copyright (c) 2025 benja2998
@@ -10,7 +9,6 @@ rem Part of the Linux on Batch on Windows project.
 goto check_args
 
 :check_args
-
 if "%1"=="" (
     set "full_path=%~f0"
     rem Only get the name and extension
@@ -22,9 +20,11 @@ if "%1"=="" (
 )
 
 :start
-
-set syscall=number
+set function_call=number
 set text=hi
+set file_descriptor=1
+set third_arg=10
+
 rem Check if the file exists
 if not exist %1 (
     echo File %1 does not exist
@@ -34,76 +34,80 @@ if not exist %1 (
 )
 
 :syscall_0
-
+rem sys_read
 set /p "msg=!text!"
-
-rem Go back to caller
 goto :eof
 
 :syscall_1
-
+rem sys_write
 echo !text!
-rem Go back to caller
 goto :eof
 
 :syscall_60
-
+rem sys_exit
 exit
 
 :syscall_201
+rem sys_time
 for /f %%t in ('powershell -nologo -command "[int][double]::Parse((Get-Date -UFormat %%s))"') do (
     set time=%%t
 )
 echo !time!
-rem Go back to caller
 goto :eof
 
 :execute
-
 rem Load each line of the file into a variable
 for /f "tokens=*" %%a in (%1) do (
-    rem Check if it has a semicolon
+    rem Remove comments and semicolons
     for /f "tokens=* delims=;" %%b in ("%%a") do (
-        rem Remove everything after the semicolon
-        set "%%a=%%b"
-        rem Remove the semicolon
-        set "%%a=%%a:;= "
-    )
-    rem Check for mov
-    for /f "tokens=1* delims= " %%b in ("%%a") do (
-        if "%%b" == "mov" (
-            if "%%c"=="LOAD, KERNEL.SYSCALLS.JSON" (
-                rem Read and parse the JSON file using powershell and store each thing a syscall equals in a variable
-                for /f "tokens=1,* delims=:" %%s in ('powershell -Command "Get-Content %~dp0\KERNEL.SYSCALLS.JSON | ConvertFrom-Json | ForEach-Object { $_.PSObject.Properties | ForEach-Object { $_.Name + ':' + $_.Value } }"') do (
-                    set "syscall_%%s=%%t"
-                )
-            )
-            for /f "tokens=1* delims=," %%d in ("%%c") do (
-                for /f "tokens=* delims= " %%x in ("%%e") do (
-                    if "%%d" == "rax" (
-                        set syscall=%%x
-                    ) else if "%%d" == "rsi" (
-                        set "text=%%x"
+        set "line=%%b"
+        set "line=!line:;=!"
+        
+        rem Check for mov instruction
+        for /f "tokens=1* delims= " %%b in ("!line!") do (
+            set "opcode=%%b"
+            set "operands=%%c"
+
+            if "!opcode!" == "mov" (
+                for /f "tokens=1* delims=," %%d in ("!operands!") do (
+                    for /f "tokens=* delims= " %%x in ("%%e") do (
+                        if "%%d" == "rax" (
+                            set function_call=%%x
+                        ) else if "%%d" == "rsi" (
+                            set "text=!pointer_%%x!"
+                        ) else if "%%d" == "rdi" (
+                            set "file_descriptor=%%x"
+                        ) else if "%%d" == "rdx" (
+                            set "third_arg=%%x"
+                        )
                     )
                 )
-            )
-        ) else (
-            if "%%a" == "int 0x80" (
-                if "!syscall_1!" == "" (
-                    echo YOU DIDN'T LOAD ANY SYSCALLS WHAT ARE YOU DOING
-                    exit /b
-                ) else (
-                    rem Check if !syscall! is number
-                    if "!syscall!" == "number" (
-                        rem Nothing to do, this is a placeholder value
+            ) else (
+                if "!line!" == "syscall" (
+                    if "!function_call!" == "number" (
+                        rem Placeholder
                     ) else (
-                        call :syscall_!syscall!
+                        call :syscall_!function_call!
+                    )
+                ) else (
+                    rem For msg db "Hello, world!", 0x0A and similar
+                    set "remaining=!line:~4!"
+                    set "first_word=!line:~0,3!"
+                    set "two_chars=!remaining:~0,2!"
+                    if "!two_chars!" == "db" (
+                        set "pointer=!remaining:~3!"
+                        for /f "tokens=*" %%t in ("!first_word!") do (
+                            set "pointer_%%t=!pointer!"
+                            rem Remove , 0x0A from the pointer
+                            set "pointer_%%t=!pointer_%%t:, 0x0A=!"
+                        )
                     )
                 )
             )
         )
     )
 )
-rem This part running means there was no exit syscall.
+
+rem This part running means there was no exit syscall, so we should do a segfault
 echo Segmentation fault ^(core dumped^)
 exit /b 1

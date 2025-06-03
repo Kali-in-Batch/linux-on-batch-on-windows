@@ -1,6 +1,0 @@
-{
-    "0": "sys_read",
-    "1": "sys_write",
-    "60": "sys_exit",
-    "201": "sys_time"
-}
