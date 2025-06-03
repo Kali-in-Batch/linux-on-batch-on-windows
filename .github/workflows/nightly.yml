@@ -1,0 +1,32 @@
+name: Nightly Build
+
+on:
+  push:
+    branches:
+      - '**'  # Trigger on push to any branch
+
+permissions:
+  contents: write  # Required to create releases
+
+jobs:
+  nightly-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get commit hash
+        id: get_commit
+        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Create nightly release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Nightly build ${{ env.COMMIT_HASH }}
+          tag_name: nightly-${{ env.COMMIT_HASH }}
+          body: |
+            Automated nightly build for commit `${{ env.COMMIT_HASH }}`
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
