@@ -43,6 +43,11 @@ rem sys_write
 echo !text!
 goto :eof
 
+:syscall_39
+rem sys_getpid
+powershell -nologo -command "Write-Host $PID"
+goto :eof
+
 :syscall_60
 rem sys_exit
 exit
