@@ -28,5 +28,10 @@ jobs:
           body: |
             Automated nightly build for commit `${{ env.COMMIT_HASH }}`
           prerelease: true
+          files: |
+            src/emulator.bat
+            src/hello-world.asm
+            LICENSE
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
