@@ -2,7 +2,7 @@
 
 Basic Linux emulator written in batch. Currently doesn't have a lot of syscalls and may be buggy.
 
-*Note: This is alpha-quality software. I do **NOT** recommend using this for testing Linux ports of programs written in NASM unless they're VERY basic, like hello world programs. If you just want to experiment, do whatever you want. If you work at a company and see someone using this software for production, tell your boss immediately.*
+*Note: This is alpha-quality software. Do not use this for testing Linux assembly code.*
 
 ## Usage
 
