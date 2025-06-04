@@ -35,18 +35,42 @@ if not exist %1 (
 )
 
 :syscall_0
-rem sys_read
-set /p "msg=!text!"
+rem sys_read (file descriptor, buffer, count)
+rem Error if file descriptor is not 0
+
+if "!file_descriptor!" == "0" (
+    rem stdin
+    set /p stdin=
+    rem Get the length of !stdin!
+    for /f %%L in ('powershell -Command "('!stdin!').Length"') do set "lenstdin=%%L"
+    rem Save it to the buffer given
+    for /f "tokens=1" %%t in ("!textValue!") do (
+        rem If !lenstdin! is greater than !pointer_%%t!, cause a segfault
+        if "!lenstdin!" GTR "!pointer_%%t!" (
+            rem Buffer overflow
+            echo Segmentation fault ^(core dumped^)
+            exit 1
+        )
+        set "pointer_%%t=!stdin!"
+    )
+) else (
+    echo invalid file descriptor
+)
+
 goto :eof
 
 :syscall_1
-:: sys_write
+rem sys_write
 
 for /f "delims=" %%A in ('powershell -Command "$t='!text!'; $t.Substring(0, [Math]::Min($t.Length, !third_arg!))"') do (
     set "truncated=%%A"
 )
-
-echo !truncated!
+rem Error if file descriptor is not 1
+if "!file_descriptor!" == "1" (
+    echo !truncated!
+) else (
+    echo invalid file descriptor
+)
 goto :eof
 
 :syscall_39
@@ -56,7 +80,7 @@ goto :eof
 
 :syscall_60
 rem sys_exit
-exit
+exit !file_descriptor!
 
 :syscall_201
 rem sys_time
@@ -86,10 +110,17 @@ for /f "tokens=*" %%a in (%1) do (
                             set function_call=%%x
                         ) else if "%%d" == "rsi" (
                             set "text=!pointer_%%x!"
+                            set "textValue=%%x"
                         ) else if "%%d" == "rdi" (
                             set "file_descriptor=%%x"
                         ) else if "%%d" == "rdx" (
                             set "third_arg=!pointer_%%x!"
+                            rem Check if rdx is a number
+                            for /f %%A in ('powershell -Command "if ([double]::TryParse('%%x', [ref]0)) { 1 } else { 0 }"') do (
+                                if "%%A" == "1" (
+                                    set "third_arg=%%x"
+                                )
+                            )
                         )
                     )
                 )
@@ -139,6 +170,13 @@ for /f "tokens=*" %%a in (%1) do (
                                 )
                             )
                         )
+                    ) else if "!second_word!" == "resb" (
+                        rem Something like buffer resb 100
+                        for /f "tokens=1" %%t in ("!first_word!") do (
+                            rem Probably the most straight forward one to implement...
+                            set "pointer_%%t=!pointer!"
+                            echo !pointer_%%t!
+                        )
                     )
                 )
             )
@@ -148,4 +186,4 @@ for /f "tokens=*" %%a in (%1) do (
 
 rem This part running means there was no exit syscall, so we should do a segfault
 echo Segmentation fault ^(core dumped^)
-exit /b 1
+exit 1

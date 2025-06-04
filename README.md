@@ -41,7 +41,7 @@ _start:
     syscall
 
     mov rax, 60
-    xor rdi, rdi
+    mov rdi, rdi
     syscall
 ```
 You may also try the [hello-world.asm](./src/hello-world.asm) file:
