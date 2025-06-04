@@ -54,3 +54,11 @@ You may also try the [hello-world.asm](./src/hello-world.asm) file:
 For the latest features and updates, check out our [nightly builds!](https://github.com/benja2998/linux-on-batch-on-windows/releases/)
 
 For the most stable features and updates, check out the [latest release!](https://github.com/benja2998/linux-on-batch-on-windows/releases/latest)
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
+
+---
+
+Copyright (c) 2025 benja2998. Licensed under the [MIT License](./LICENSE).
