@@ -2,6 +2,10 @@
 
 Basic Linux emulator written in batch. Currently doesn't have a lot of syscalls and may be buggy.
 
+For the latest features and updates, check out our [nightly builds!](https://github.com/benja2998/linux-on-batch-on-windows/releases/)
+
+For the most stable features and updates, check out the [latest release!](https://github.com/benja2998/linux-on-batch-on-windows/releases/latest)
+
 Usage:
 
 ```batch
