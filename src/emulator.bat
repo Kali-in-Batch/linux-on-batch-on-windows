@@ -184,5 +184,5 @@ for /f "tokens=*" %%a in (%1) do (
 )
 
 rem This part running means there was no exit syscall, so we should do a segfault
-echo Segmentation fault ^(core dumped^)
+echo Segmentation fault
 exit 1
