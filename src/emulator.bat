@@ -20,10 +20,11 @@ if "%1"=="" (
 )
 
 :start
-set function_call=number
-set text=hi
-set file_descriptor=1
-set third_arg=10
+set "function_call=number"
+set "text=hi"
+set "file_descriptor=1"
+set "third_arg=0"
+set "len=0"
 
 rem Check if the file exists
 if not exist %1 (
@@ -39,8 +40,13 @@ set /p "msg=!text!"
 goto :eof
 
 :syscall_1
-rem sys_write
-echo !text!
+:: sys_write
+
+for /f "delims=" %%A in ('powershell -Command "$t='!text!'; $t.Substring(0, [Math]::Min($t.Length, !third_arg!))"') do (
+    set "truncated=%%A"
+)
+
+echo !truncated!
 goto :eof
 
 :syscall_39
@@ -83,7 +89,7 @@ for /f "tokens=*" %%a in (%1) do (
                         ) else if "%%d" == "rdi" (
                             set "file_descriptor=%%x"
                         ) else if "%%d" == "rdx" (
-                            set "third_arg=%%x"
+                            set "third_arg=!pointer_%%x!"
                         )
                     )
                 )
@@ -110,6 +116,28 @@ for /f "tokens=*" %%a in (%1) do (
                             set "pointer_%%t=!pointer_%%t:, 0x0A=!"
                             rem Remove surrounding quotes
                             set "pointer_%%t=!pointer_%%t:"=!"
+                        )
+                    ) else if "!second_word!" == "equ" (
+                        rem Something like len equ $ - msg
+                        for /f "tokens=3,*" %%t in ("!pointer!") do (
+                            set "pointer2=%%t"
+                            if "!pointer!" == "$ - !pointer2!" (
+                                rem Get the length of !pointer_%%t!
+                                for /f %%L in ('powershell -Command "('!pointer_%%t!').Length"') do set "len_%%t=%%L"
+                            )
+                            for /f "tokens=*" %%u in ("!first_word!") do (
+                                set "pointer_%%u=!len_%%t!"
+                            )
+                        )
+                        rem Or if it's something like len equ 123
+                        for /f "tokens=1" %%t in ("!pointer!") do (
+                            for /f %%A in ('powershell -Command "if ([double]::TryParse('!pointer!', [ref]0)) { 1 } else { 0 }"') do (
+                                if %%A==1 (
+                                    for /f "tokens=*" %%u in ("!first_word!") do (
+                                        set "pointer_%%u=%%t"
+                                    )
+                                )
+                            )
                         )
                     )
                 )
