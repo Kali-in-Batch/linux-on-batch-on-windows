@@ -175,7 +175,6 @@ for /f "tokens=*" %%a in (%1) do (
                         for /f "tokens=1" %%t in ("!first_word!") do (
                             rem Probably the most straight forward one to implement...
                             set "pointer_%%t=!pointer!"
-                            echo !pointer_%%t!
                         )
                     )
                 )
