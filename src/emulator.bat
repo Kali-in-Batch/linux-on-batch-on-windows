@@ -106,6 +106,7 @@ for /f "tokens=*" %%a in (%1) do (
             if "!opcode!" == "mov" (
                 for /f "tokens=1* delims=," %%d in ("!operands!") do (
                     for /f "tokens=* delims= " %%x in ("%%e") do (
+                        set "pointer_%%d=%%x"
                         if "%%d" == "rax" (
                             set function_call=%%x
                         ) else if "%%d" == "rsi" (
