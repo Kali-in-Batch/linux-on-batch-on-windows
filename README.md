@@ -2,11 +2,9 @@
 
 Basic Linux emulator written in batch. Currently doesn't have a lot of syscalls and may be buggy.
 
-For the latest features and updates, check out our [nightly builds!](https://github.com/benja2998/linux-on-batch-on-windows/releases/)
+*Note: This is alpha-quality software. I do **NOT** recommend using this for testing Linux ports of programs written in NASM unless they're VERY basic, like hello world programs. If you just want to experiment, do whatever you want. If you work at a company and see someone using this software for production, tell your boss immediately.*
 
-For the most stable features and updates, check out the [latest release!](https://github.com/benja2998/linux-on-batch-on-windows/releases/latest)
-
-Usage:
+## Usage
 
 ```batch
 .\emulator.bat foo.asm
@@ -50,3 +48,9 @@ You may also try the [hello-world.asm](./src/hello-world.asm) file:
 ```batch
 .\emulator.bat hello-world.asm
 ```
+
+## Downloads
+
+For the latest features and updates, check out our [nightly builds!](https://github.com/benja2998/linux-on-batch-on-windows/releases/)
+
+For the most stable features and updates, check out the [latest release!](https://github.com/benja2998/linux-on-batch-on-windows/releases/latest)
